@@ -52,6 +52,34 @@ public class Main {
                 
                 break;
                 
+            case "cin":
+            	String src = sc.next();
+                String dest = sc.next();
+                System.out.println( "Merge from: " + src );
+                System.out.println( "Merge changes to: " + dest );
+                String[] arr = new String[ 2 ];
+                arr[0] = src;
+                arr[1] = dest;
+                CreateMain.Checkout( arr );
+            	break;
+            	
+            case "cout":
+            	String src = sc.next();
+            	String mani = sc.next();
+                String dest = sc.next();
+                System.out.println( "Copy repo from: " + src );
+                System.out.println( "Manifest version: " + mani );
+                System.out.println( "Copy repo into: " + dest );
+                String[] arr = new String[ 2 ];
+                arr[0] = src;
+                arr[1] = mani;
+                arr[2] = dest;
+                CreateMain.Checkout( arr );
+            	break;
+            	
+            case "label":
+            	break;
+                
           // exit the command line
             case "exit":
                 isExit = true;
