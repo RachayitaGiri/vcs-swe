@@ -16,13 +16,18 @@ import java.io.*;
  * 
  * Working commands:
  *  create: copies directory from String "source" to String "destination"  ex: create sourceRepo destinationRepo
+ *  
+ *  label: 
+ *      syntax: label <repo name> <manifest name> <labels separated by commas>
+ *      creates a json label file with the keys of labels and value of the manifest
+ *  
  *  exit: exits the program
  * 
  */
 
 public class Main {
     
-    static Scanner sc = new Scanner(System.in); // takes user input    
+    static Scanner sc = new Scanner(System.in); // takes user input        
     
   /*
    * main: takes user input and separates them by spaces.
@@ -31,7 +36,14 @@ public class Main {
    */
     public static void main( String[] args ) throws IOException{
         
+        String src;
+        String dest;
+        String mani;
+        String label;
+        String[] arr;
+        
         boolean isExit = false;
+        
       // take all user input
         while( !isExit ) {
             String token = sc.next();                  
@@ -41,16 +53,54 @@ public class Main {
             
             //keyword: create - create a repository of the name in next token
             case "create":
-                String src = sc.next();
-                String dest = sc.next();
+                src = sc.next();
+                dest = sc.next();
                 System.out.println( "Create a new repository from source: " + src );
                 System.out.println( "Copy repository into: " + dest );
-                String[] arr = new String[ 2 ];
+                arr = new String[ 2 ];
                 arr[0] = src;
                 arr[1] = dest;
                 CreateMain.CreateSource( arr );
                 
                 break;
+                
+            case "cin":
+            	src = sc.next();
+                dest = sc.next();
+                System.out.println( "Merge from: " + src );
+                System.out.println( "Merge changes to: " + dest );
+                arr = new String[ 2 ];
+                arr[0] = src;
+                arr[1] = dest;
+                CreateMain.Checkout( arr );
+            	break;
+            	
+            case "cout":
+            	src = sc.next();
+            	mani = sc.next();
+                dest = sc.next();
+                System.out.println( "Copy repo from: " + src );
+                System.out.println( "Manifest version: " + mani );
+                System.out.println( "Copy repo into: " + dest );
+                arr = new String[ 2 ];
+                arr[0] = src;
+                arr[1] = mani;
+                arr[2] = dest;
+                CreateMain.Checkout( arr );
+            	break;
+            	
+            case "label":
+                src = sc.next();
+                mani = sc.next();
+                
+                String temp = sc.nextLine();
+                label = temp.trim();
+                 
+                //System.out.println( "Manifest name: " + mani );
+                //System.out.println( "Label name: " + label );
+                Label newLabel = new Label();           
+                newLabel.CreateLabel( src, mani, label );
+            	break;
                 
           // exit the command line
             case "exit":
