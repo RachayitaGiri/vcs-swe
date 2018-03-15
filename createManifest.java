@@ -1,7 +1,9 @@
 import java.io.*;
 import java.util.*;
 import java.text.*;
-
+import org.json.simple.JSONArray; 
+import org.json.simple.JSONObject; 
+import org.json.simple.parser.JSONParser;
 /*
  * class name: createManifest
  * Authors: Derek Baker
@@ -19,7 +21,7 @@ import java.text.*;
  */
 
 
-public class createManifest {
+public class CreateManifest {
     public static void Manifest(String repo_path, String artID, String target) throws IOException {
         try {
             Date date = new Date();
@@ -31,10 +33,15 @@ public class createManifest {
                     date and time
             */
             String timestamp;
-            String b = target+"mani_create.txt";
+            String b = target+"mani_create.json";
+            JSONObject jsonMani = new JSONObject();
+            jsonMani.put("path", repo_path);
+            jsonMani.put("artID", artID);
+            jsonMani.put("Date", ft.format(date));
 
             Writer  out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(b, true), "UTF-8"));
-            out.write("\n" + repo_path + "; " + artID + "; " + ft.format(date) + ";");
+            out.write(jsonMani.toJSONString().replace("\\",""));
+//          out.write("\n" + repo_path + "; " + artID + "; " + ft.format(date) + ";");
             out.close();
         }   
         catch(Exception e) {
