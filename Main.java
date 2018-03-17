@@ -1,4 +1,7 @@
 import java.util.Scanner;
+
+import org.json.simple.parser.ParseException;
+
 import java.io.*;
 
 /*
@@ -20,6 +23,7 @@ import java.io.*;
  *  label: 
  *      syntax: label <repo name> <manifest name> <labels separated by commas>
  *      creates a json label file with the keys of labels and value of the manifest
+ *      no frills: compress ALL spaces the user inputs for labels
  *  
  *  exit: exits the program
  * 
@@ -27,14 +31,15 @@ import java.io.*;
 
 public class Main {
     
-    static Scanner sc = new Scanner(System.in); // takes user input        
+    static Scanner sc = new Scanner(System.in); // takes user input
+    static Label newLabel = new Label();  
     
   /*
    * main: takes user input and separates them by spaces.
    *    The keyword "exit" will stop the first while loop and go into parsing
    *    the input by spaces. Each string token will be read and matched in a switch.
    */
-    public static void main( String[] args ) throws IOException{
+    public static void main( String[] args ) throws IOException, ParseException{
         
         String src;
         String dest;
@@ -78,11 +83,14 @@ public class Main {
             case "cout":
             	src = sc.next();
             	mani = sc.next();
+            	
+            	mani = newLabel.CheckForLabel( src, mani );
+            	
                 dest = sc.next();
                 System.out.println( "Copy repo from: " + src );
                 System.out.println( "Manifest version: " + mani );
                 System.out.println( "Copy repo into: " + dest );
-                arr = new String[ 2 ];
+                arr = new String[ 3 ];
                 arr[0] = src;
                 arr[1] = mani;
                 arr[2] = dest;
@@ -97,8 +105,7 @@ public class Main {
                 label = temp.trim();
                  
                 //System.out.println( "Manifest name: " + mani );
-                //System.out.println( "Label name: " + label );
-                Label newLabel = new Label();           
+                //System.out.println( "Label name: " + label );                        
                 newLabel.CreateLabel( src, mani, label );
             	break;
                 
