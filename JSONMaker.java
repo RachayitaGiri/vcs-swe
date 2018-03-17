@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 /*
- * class name: Label
+ * class name: JSONMaker
  * 
  * @Author Derek Baker contact: derekjohnbaker23@gmail.com
  *              
@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
  * 
  * This class will be the singleton for JSON objects. This class will create objects for manipulation, read, and write files.
  * 
+ * TO-DO: make all-encompassing for checking keys and getting values so it's all self-contained and little coupling with other files
  * 
  */
 public class JSONMaker {
