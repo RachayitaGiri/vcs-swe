@@ -1,9 +1,16 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Iterator;
 
 import org.json.simple.JSONArray; 
 import org.json.simple.JSONObject; 
-import org.json.simple.parser.JSONParser; 
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.sun.javafx.scene.paint.GradientUtils.Parser; 
 
 /*
  * class name: Label
@@ -24,8 +31,8 @@ public class Label {
      *      input: the string to be trimmed of white space an then checked for length
      */
     public String TrimLength( String input ) {
-        
-        input.trim();
+        // remove all white space        
+        input = input.replaceAll( "\\s+","" );
         
         // return string = 29 characters (0 index), only used if counter>29
         String ret = "";
@@ -107,6 +114,34 @@ public class Label {
 	        System.out.println("\nJSON object:" + jsonLabels );
 	    }
 		
+	}
+	
+	/* 
+     * CheckForLabel: checks the input to see if it matches a label, if a match, return the manifest name
+     *      repo: the repository where the labels reference the manifest files
+     *      input: the label to be checked against
+     */    
+	public String CheckForLabel( String repo, String input ) throws FileNotFoundException, IOException, ParseException {
+	    String path = repo+"/labels.json";
+	    JSONParser parser = new JSONParser();
+	    JSONObject parsedJSON = (JSONObject) parser.parse( new FileReader( path ) );
+	    
+	    System.out.println( "PARSED LABELS: " + parsedJSON.toJSONString() );
+	    
+	    String ret = input;
+	    
+	    if( parsedJSON.containsKey( input ) ) {
+	        ret = (String) parsedJSON.get( input );
+	    }
+	    
+	    /*for( Object keys : parsedJSON ) {
+	        JSONObject label = (JSONObject) keys;
+	        if( label.toString()==input ) {
+	            ret = (String) label.get( input );
+	            break;
+	        }        	       
+	    } */	    
+	    return ret;
 	}
 
 }
