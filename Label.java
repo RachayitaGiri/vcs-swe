@@ -2,15 +2,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.Iterator;
-
-import org.json.simple.JSONArray; 
+ 
 import org.json.simple.JSONObject; 
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import com.sun.javafx.scene.paint.GradientUtils.Parser; 
+ 
 
 /*
  * class name: Label
@@ -26,6 +22,8 @@ import com.sun.javafx.scene.paint.GradientUtils.Parser;
  * 
  */
 public class Label {        
+    
+    JSONMaker jsonClass = new JSONMaker();
     
     /*  TrimLength: if the length >30 characters, only the first 30 will be returned
      *      input: the string to be trimmed of white space an then checked for length
@@ -60,31 +58,24 @@ public class Label {
     /*  ParseInput: adds the label keys to the pairings of the manifest file indicated.
      *      mani: the name of the manifest file that the labels will reference
      *      userLables: holds up four labels (or possibly more in the future) that will act as keys for the value of the manifest 
-     */
-    @SuppressWarnings("unchecked")
-    public JSONObject ParseInput( String mani, String userLabel ) {                
-        
-        // the return object
-        JSONObject jsons = new JSONObject();
+     */    
+    public JSONObject ParseInput( String mani, String userLabel ) throws IOException {                
         
         // the split strings, accepts only the first 4
         String[] labels = userLabel.split( "," );
         
-        // amount of labels, only useful if > 4
-        int len = (labels.length > 4)? 4 : labels.length; 
+        //amount of labels, only useful if > 4
+        int len = (labels.length > 4)? 4 : labels.length;
         
+        String[] trimmedLabels = new String[ len ];
+        String[] keyValues = new String[ len ];                
         
-        System.out.println( "Length of labels: " + len );
-        for( int i = 0; i<len; i++) {            
-            String labelTrimmed = TrimLength( labels[ i ] );
-            //trim again just in case
-            labelTrimmed.trim();
-            System.out.println( "labels: " + labelTrimmed );
-            jsons.put( labelTrimmed, mani );
-        }        
+        for( int i = 0; i < len; i++ ) {
+            trimmedLabels[ i ] = TrimLength( labels[ i ] );
+            keyValues[ i ] = mani;
+        }
         
-        System.out.println( "json object: " + jsons );
-        return jsons; 
+        return jsonClass.CreateJSONObject( trimmedLabels, keyValues ); 
     }
     
 	
@@ -94,26 +85,17 @@ public class Label {
      *      userLables: holds up four labels (or possibly more in the future) that will act as keys for the value of the manifest
 	 */    
 	public void CreateLabel( String repo, String mani, String userLabel ) throws IOException {		
-	    
-	    JSONObject jsonLabels = ParseInput( mani, userLabel );
-	    
+	    	    
+	    JSONObject jsonLabels = ParseInput( mani, userLabel );	    
 	    
 	    /*
 	     *  TO DO: 
 	     *     Update path if needed, not sure of source path or future path
 	     * 
 	     */
-	    String path = repo+"/labels_"+mani+".json";
+	    String path = repo+"/labels.json";
 	    
-	    
-	    
-	    System.out.println( "path: " + path );
-	    try( FileWriter file = new FileWriter( path ) ) {	        
-	        file.write( jsonLabels.toJSONString() );
-	        System.out.println("Successfully Copied JSON Object to File...");
-	        System.out.println("\nJSON object:" + jsonLabels );
-	    }
-		
+	    jsonClass.WriteToFile( path, jsonLabels );
 	}
 	
 	/* 
@@ -122,9 +104,10 @@ public class Label {
      *      input: the label to be checked against
      */    
 	public String CheckForLabel( String repo, String input ) throws FileNotFoundException, IOException, ParseException {
+	    
 	    String path = repo+"/labels.json";
-	    JSONParser parser = new JSONParser();
-	    JSONObject parsedJSON = (JSONObject) parser.parse( new FileReader( path ) );
+	    
+	    JSONObject parsedJSON = jsonClass.ReadFile( path );
 	    
 	    System.out.println( "PARSED LABELS: " + parsedJSON.toJSONString() );
 	    
