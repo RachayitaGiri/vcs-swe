@@ -1,11 +1,27 @@
-/* Run the program as shown below:
-    java CreateMain <src_file> <target_repo>
-*/
-
-/* This file takes as input the name of the source file and
-  target file in the command line*/
-
 import java.io.*;
+import java.util.Scanner;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+
+/*
+ * class name: CreateMain
+ * Authors: Derek Baker
+ *              contact: derekjohnbaker23@gmail.com
+ *              
+ *          Rachayita Giri
+ *              contact: rachayitagiri@gmail.com
+ *              
+ *          Saloni Buddhadeo
+ *              contact: salonibuddhadeo@gmail.com
+ * 
+ * This file contains the functions to iterate over the source folder, replicate the hierarchy of the source folder in the target
+ * repository, calculate the artifact IDs of the artifacts, and update the corresponding entry in the manifest file.
+ *
+ * Also added the Checkout function to create a local copy of a guven project version corresponding to the manifest file referred to by the user.
+ * 
+ */
 
 public class CreateMain {    
     
@@ -18,13 +34,13 @@ public class CreateMain {
 
         //Create manifest file
         String a = args[1]+"/mani_create.txt";
-		BufferedWriter manibw = new BufferedWriter(new FileWriter(a));	//------------APPENDING ISSUES IN FILE
-		manibw.write("CREATE " + args[0] + args[1]);
+		BufferedWriter manibw = new BufferedWriter(new FileWriter(a));	
+		manibw.write("create " + args[0] + " " + args[1]);
 		manibw.close();
 
         System.out.println("Repo created successfully.");
         target = args[1] + "/";
-        showFiles(files, args[0], target);                      //args[1] + "/" + 
+        showFiles(files, args[0], target);                      
         }
 
     public static void showFiles(File[] files, String repo_name, String target) {
@@ -39,8 +55,8 @@ public class CreateMain {
                 repo_path += file.getName();                            //repository PATH name - repo_path
                 String newFolder = target+repo_path;
                 System.out.println( newFolder );                
-                new File(newFolder).mkdirs();                             //ONLY CREATES A DIR IN THE REPO
-                showFiles(file.listFiles(), repo_path, target);                 //Calls same method again
+                new File(newFolder).mkdirs();                             
+                showFiles(file.listFiles(), repo_path, target);         //Calls same method again
             }
             else {
                 file_name = file.getName();
@@ -63,16 +79,14 @@ public class CreateMain {
     public static String copyFile(String file_name, String target) throws IOException{
         
         FileReader file = new FileReader(file_name);
-        File afile = new File(file_name);
         BufferedReader br=new BufferedReader(file);
 
         String repo_file, file_content="";
         int i, checksum=0, counter=0;
         repo_file = artID(file_name);
         String fileDest = target+file_name;
-        //new File(fileDest).mkdir();
-        BufferedWriter bw=new BufferedWriter(new FileWriter(fileDest+"/"+repo_file));
-
+        BufferedWriter bw = new BufferedWriter(new FileWriter(fileDest+"/"+repo_file));
+ 
         while((i=br.read())!=-1){
             file_content += (char)i;
         }
@@ -93,7 +107,6 @@ public static String artID(String file_name) throws IOException{
         int i, checksum=0, counter=0;
         char cha = '\0';
         int weights[] = {1,7,11,17};
-        // double file_size = file.length();
 
         while((i=br.read())!=-1){
             cha = (char)i;                                      //Converting string to char
@@ -103,13 +116,75 @@ public static String artID(String file_name) throws IOException{
         checksum -= (int) cha * weights[(counter-1)%4];
         checksum %= (Math.pow(2,31) - 1);
         art_file_name = checksum+"-L"+afile.length()+".txt";    // artifactID - new file name
-        
-        //System.out.println(art_file_name);                    //Display artifact file name
-        // afile.renameTo(art_file_name);
-
         br.close();
         file.close();
 
         return art_file_name;
     }
+//Function to checkout files
+    //Main.java passes three arguments - repofolder, manifest, targetfolder
+    public static void Checkout(String[] args) throws IOException, ParseException {
+
+        String src = args[0];
+        String mani = args[1];
+        String dest = args[2];
+
+        int i;
+
+        JSONParser parser = new JSONParser();
+        JSONArray a = (JSONArray) parser.parse(new FileReader("/home/rachayitagiri/NetBeansProjects/vcs-swe/src/"+src+"/"+mani));
+
+        for (Object o : a ) {
+
+            JSONObject artifact = (JSONObject) o; 
+            String path = (String) artifact.get("art_src_path");
+
+            File myFile = new File(path);
+            String myDir = myFile.getParent();          //get parent directory path
+            String myFileName = myFile.getName();       //get filename
+            System.out.println("Source path: "+path);   //print the path to the corresponding file in the source folder
+            
+            //get path from art_src_path and split it to get the corresponding target destination
+            String parts[] = myDir.split("/");
+            String[] arr = new String[parts.length-1];
+            for (i=0;i<parts.length-1;i++ ) {
+                arr[i] = parts[i+1];
+            }
+            StringBuilder result = new StringBuilder();
+            for(String string : arr) {
+                result.append(string);
+                result.append("/");
+            }
+            String tgtfolder = result.length() > 0 ? result.substring(0, result.length() - 1): ""; 
+            tgtfolder = dest+"/"+tgtfolder;
+            System.out.println("Destination :"+tgtfolder);
+            
+
+            if (new File(tgtfolder).exists()) {
+
+                System.out.println("Destination directory "+tgtfolder+" exists...");
+                System.out.println("Creating file... "+tgtfolder+"/"+myFileName);
+                
+            }
+            else 
+            {
+                System.out.println("Creating directory: "+tgtfolder);
+                new File(tgtfolder).mkdirs();
+            }
+            FileInputStream FI = new FileInputStream("/home/rachayitagiri/NetBeansProjects/vcs-swe/src/"+myFile);
+            File outfile = new File(tgtfolder+"/"+myFileName);
+
+            outfile.createNewFile();
+
+            FileOutputStream FO = new FileOutputStream(tgtfolder+"/"+myFileName);
+            int b;
+            //read content and write in another file
+            while((b=FI.read())!=-1)
+            { 
+                FO.write(b);
+            }
+            System.out.println("File Copied...");
+            FI.close();
+    }
+}
 }
