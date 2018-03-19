@@ -1,3 +1,4 @@
+#vcs-swe
 -------------
 CLASS NUMBER
 -------------
@@ -46,12 +47,12 @@ CALCULATING THE ARTIFACT ID:
 ----------------------------
 As described in the project problem, the artifact ID has been calculated using the following method.
 
-The arifact ID is a 4-byte weighted checksum of all the characters (bytes) in the file (i.e., the bytes in the file's contents) followed by a hyphen and an L and the integer file size, followed by the file's extension. 
+The arifact ID is a 4-byte weighted checksum of all the characters (bytes) in the file (i.e., the bytes in the file's contents) followed by a hyphen and an “L” and the integer file size, followed by the file's extension. 
 
 The 4 weights by which each 4 character group are multiplied are 1, 7, 11, and, 17. Thus, if the file contents is "HELLO WORLD", the checksum S is: 
 S = 1*H + 7*E +11*L +17*L + 1*O + 7*' ' + 11*W + 17*O + 1*R + 7*L + 11*D;
 
-and the file size is 11 (because HELLO WORLD = 11 characters). Note, the ASCII numeric value of each character is used and we indicated the space character by ' '. For example if this was the contents of a version of file fred.txt, then the artifact ID code name would be 6648-L11.txt, in a leaf folder named fred.txt.
+and the file size is 11 (because HELLO WORLD = 11 characters). Note, the ASCII numeric value of each character is used and we indicated the space character by ' '. For example if this was the contents of a version of file fred.txt, then the artifact ID code name would be “6648-L11.txt”, in a leaf folder named “fred.txt”.
 
 Modulus: Because the sum can get rather large for a big file, make sure the sum never gets too large by wrapping it using the following prime modulus operator: m == (2^31) - 1 == 2,147,483,647.
 
@@ -170,4 +171,4 @@ Not Included:
 -----
 BUGS
 -----
-1) Only local files will be copied, full path names with drive types (i.e.: C:/...) will cause errors.
+1) Only local files will be copied, full path names with drive types (i.e.: C:/...) will cause errors in the create command.
