@@ -22,6 +22,8 @@ import org.json.simple.parser.ParseException;
  */
 public class JSONMaker {
     
+    private static JSONMaker singleInstance = null;
+    
     /* 
      * CreateJSONObject: returns a JSON object with designated keys and values for manipulation; ie: testing key pairs
      *      keys: array of key names
@@ -63,5 +65,15 @@ public class JSONMaker {
             System.out.println("Successfully Copied JSON Object to File...");
             System.out.println("\nJSON object:" + jsonHash );
         }
+    }
+    
+    /*
+     * getJSONMaker: return the singleton JSON maker, don't want more than one instance of the JSON class
+     */
+    public static JSONMaker getJSONMaker() {
+        if( singleInstance == null ) {
+            singleInstance = new JSONMaker();
+        }
+        return singleInstance;
     }
 }

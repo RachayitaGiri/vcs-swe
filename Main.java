@@ -1,5 +1,3 @@
-import java.util.Scanner;
-
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
@@ -29,10 +27,9 @@ import java.io.*;
  * 
  */
 
-public class Main {
+public class Main {        
     
-    static Scanner sc = new Scanner(System.in); // takes user input
-    static Label newLabel = new Label();  
+    static Label newLabel = new Label();
     
   /*
    * main: takes user input and separates them by spaces.
@@ -41,72 +38,38 @@ public class Main {
    */
     public static void main( String[] args ) throws IOException, ParseException{
         
-        String src;
-        String dest;
-        String mani;
-        String label;
-        String[] arr;
+        InputParser sc = InputParser.getParser();
+        Create_Repo createRepo = new Create_Repo();
+        Check_In checkIn = new Check_In();
+        Check_Out checkOut = new Check_Out();        
         
         boolean isExit = false;
         
       // take all user input
         while( !isExit ) {
-            String token = sc.next();                  
+            String token = sc.GetToken();      
         
           //parse input and read each string  token                    
             switch( token ) {            
             
-            //keyword: create - create a repository of the name in next token
+          // keyword: create - create a repository of the name in next token
             case "create":
-                src = sc.next();
-                dest = sc.next();
-                System.out.println( "Create a new repository from source: " + src );
-                System.out.println( "Copy repository into: " + dest );
-                arr = new String[ 2 ];
-                arr[0] = src;
-                arr[1] = dest;
-                CreateMain.CreateSource( arr );
-                
+                createRepo.RunOperation();
                 break;
                 
+          // check in command
             case "cin":
-            	src = sc.next();
-                dest = sc.next();
-                System.out.println( "Merge from: " + src );
-                System.out.println( "Merge changes to: " + dest );
-                arr = new String[ 2 ];
-                arr[0] = src;
-                arr[1] = dest;
-                CreateMain.Checkout( arr );
+                checkIn.RunOperation();
             	break;
             	
+          // check out command
             case "cout":
-            	src = sc.next();
-            	mani = sc.next();
-            	
-            	mani = newLabel.CheckForLabel( src, mani );
-            	
-                dest = sc.next();
-                System.out.println( "Copy repo from: " + src );
-                System.out.println( "Manifest version: " + mani );
-                System.out.println( "Copy repo into: " + dest );
-                arr = new String[ 3 ];
-                arr[0] = src;
-                arr[1] = mani;
-                arr[2] = dest;
-                CreateMain.Checkout( arr );
+                checkOut.RunOperation();
             	break;
-            	
-            case "label":
-                src = sc.next();
-                mani = sc.next();
-                
-                String temp = sc.nextLine();
-                label = temp.trim();
-                 
-                //System.out.println( "Manifest name: " + mani );
-                //System.out.println( "Label name: " + label );                        
-                newLabel.CreateLabel( src, mani, label );
+            
+          // label a manifest file
+            case "label":                                       
+                newLabel.CreateLabel();
             	break;
                 
           // exit the command line
@@ -120,6 +83,7 @@ public class Main {
                 break;
             }            
         }                
-        sc.close();
+        sc.CloseInput();
+        System.out.println( "Exited successfully." );
     }
 }

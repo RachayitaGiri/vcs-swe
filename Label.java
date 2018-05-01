@@ -23,7 +23,7 @@ import org.json.simple.parser.ParseException;
  */
 public class Label {        
     
-    JSONMaker jsonClass = new JSONMaker();
+    JSONMaker jsonClass = JSONMaker.getJSONMaker();
     
     /*  TrimLength: if the length >30 characters, only the first 30 will be returned
      *      input: the string to be trimmed of white space an then checked for length
@@ -81,19 +81,25 @@ public class Label {
 	
 	/* 
 	 * CreateLabel: creates a labal_mani.json file with key-value pairings for label-mani
+	 *      src: the repo source
      *      mani: the name of the manifest file that the labels will reference
-     *      userLables: holds up four labels (or possibly more in the future) that will act as keys for the value of the manifest
+     *      label: holds up four labels (or possibly more in the future) that will act as keys for the value of the manifest
 	 */    
-	public void CreateLabel( String repo, String mani, String userLabel ) throws IOException {		
-	    	    
-	    JSONObject jsonLabels = ParseInput( mani, userLabel );	    
+	public void CreateLabel() throws IOException {		
+	    InputParser sc = InputParser.getParser();
+        String src = sc.GetToken();
+        String mani = sc.GetToken();
+        
+        String temp = sc.GetLine();
+        String label = temp.trim();
+	    JSONObject jsonLabels = ParseInput( mani, label );	    
 	    
 	    /*
 	     *  TO DO: 
 	     *     Update path if needed, not sure of source path or future path
 	     * 
 	     */
-	    String path = repo+"/labels.json";
+	    String path = src+"/labels.json";
 	    
 	    jsonClass.WriteToFile( path, jsonLabels );
 	}
