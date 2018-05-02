@@ -41,7 +41,8 @@ public class Main {
         InputParser sc = InputParser.getParser();
         Create_Repo createRepo = new Create_Repo();
         Check_In checkIn = new Check_In();
-        Check_Out checkOut = new Check_Out();        
+        Check_Out checkOut = new Check_Out();   
+        Merge merger = new Merge();
         
         boolean isExit = false;
         
@@ -71,6 +72,11 @@ public class Main {
             case "label":                                       
                 newLabel.CreateLabel();
             	break;
+            	
+          // do a merge
+            case "merge":
+                merger.RunOperation();
+                break;
                 
           // exit the command line
             case "exit":
