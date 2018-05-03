@@ -15,8 +15,12 @@
  * Also added the Checkout function to create a local copy of a guven project version corresponding to the manifest file referred to by the user.
  * 
  */
+import com.opencsv.CSVWriter;
+
 import java.io.*;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -29,24 +33,23 @@ public class CreateMain {
     
     public static void CreateSource(String[] args) throws IOException {
         String target;
-        File[] files = new File(args[0]).listFiles();                   //list the files/dirs in the first argument
+        File[] files = new File(args[1]).listFiles();                   //list the files/dirs in the first argument
         System.out.println("Creating repo...");
-        new File(args[1]).mkdir();
-        new File(args[1]+"/"+args[0]).mkdir();
+        new File(args[2]).mkdir();
+        new File(args[2]+"/"+args[1]).mkdir();
 
         //Create manifest file for the 'create repo' command and '.metadata.json' file
-        mani_path = args[1]+"/mani_create_.json";
-        meta_path = args[1]+"/.metadata.json";
+        mani_path = args[2]+"/mani_create_.json";
+        meta_path = args[2]+"/.metadata.csv";
         BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));
         BufferedWriter metabw = new BufferedWriter(new FileWriter(meta_path));
         //update metadata file for create command
-        metadata(args[0]+"/", mani_path, args);
+        metadata(args[1]+"/", mani_path, args, args[2]+"/.metadata.csv");
         metabw.close();
-//	manibw.close();
 
         System.out.println("Repo created successfully.");
-        target = args[1] + "/";
-        showFiles(files, args[0], target);
+        target = args[2] + "/";
+        showFiles(files, args[1], target);
         
         //modify the manifest file to the correct json format
         //append "," at end of each line and "[", "]" at start and end of file    
@@ -58,7 +61,7 @@ public class CreateMain {
         //read each line from file
         while((line = br.readLine())!= null){
             file_content.append(line);
-            file_content.append(","); 
+            file_content.append(",");
        }
         file_content.append("]");
         manibw.write(file_content.toString());
@@ -153,9 +156,9 @@ public class CreateMain {
     //Main.java passes three arguments - repofolder, manifest, targetfolder
     public static void Checkout(String[] args) throws IOException, ParseException {
 
-        String src = args[0];
-        String mani = args[1];
-        String dest = args[2];
+        String src = args[1];
+        String mani = args[2];
+        String dest = args[3];
         int i;
 
         JSONParser parser = new JSONParser();
@@ -244,8 +247,8 @@ public class CreateMain {
     //Function to checkin files
     //Main.java passes two arguments - check in folder, target repo folder    
    public static void Checkin(String[] args) throws IOException{
-       String src = args[1]+"/";                            //merge from path enterd by the user - Wall
-       String target = args[0]+"/source/";                  //merge to path, entered by the user - KL
+       String src = args[2]+"/";                            //merge from path enterd by the user - Wall
+       String target = args[1]+"/source/";                  //merge to path, entered by the user - KL
        
        String cmd = "cin";
        
@@ -253,16 +256,16 @@ public class CreateMain {
         
         File[] files = new File(src).listFiles();                   //list the files/dirs in the first argument i.e in the existing repo
 
-        mani_path = args[0]+"/mani_cin_1_.json";
+        mani_path = args[1]+"/mani_cin_1_.json";
         if(new File(mani_path).exists()){
-            i = createManifest.maniFileNo(args[0], cmd) + 1;        //does this basically return the most recent version of the manifest file????
-            mani_path = args[0]+"/mani_cin_"+(i)+"_.json";
+            i = createManifest.maniFileNo(args[1], cmd) + 1;        //does this basically return the most recent version of the manifest file????
+            mani_path = args[1]+"/mani_cin_"+(i)+"_.json";
         }
 
         BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      // Create manifest file
         
         // invoke metadata function to update the metadata file
-        metadata(args[0]+"/", mani_path, args);
+        metadata(args[1]+"/", mani_path, args, args[1]+"/.metadata.csv");
 
         showFilesCheckIn(files, src, target);
         System.out.println("Folder Checked in successfully.");
@@ -287,79 +290,106 @@ public class CreateMain {
     }
 
     //function to update .metadata.json file
-    //receives three arguments - path to repo, path of the manifest file created, command line arguments
-    public static void metadata(String repo_path, String mani_path, String[] cmd_line){
+    //receives four arguments - path to repo, path of the manifest file created, command line arguments, repo name
+    public static void metadata(String repo_path, String mani_path, String[] cmd_line, String repo_name){
         try {
             Date date = new Date();
             SimpleDateFormat ft = new SimpleDateFormat ("yyyy:MM:dd hh:mm:ss");
-            String timestamp;
-            
-            JSONParser parser = new JSONParser();
-            JSONArray metaJsonArray = (JSONArray) parser.parse(new FileReader(repo_path+".metadata.json"));
-            JSONObject jsonObj = new JSONObject();
-            
-            /*
-                To record:
-                    id
-                    manifest path
-                    command line arguments
-                    date and time
-                    id of parent repo
-            */
-            
+            String timestamp, meta_filename;
+
+            meta_filename = repo_name;
+            System.out.println(meta_filename);
+
             //calculate Object id
-            int objID = metaJsonArray.size();
+            int objID = countLines(meta_filename);      // total number of lines includes header line too. objID -- object id for th ehierarchy
 
             // calculate the parent ID
-            int parentID = parentId(repo_path, cmd_line);
-            //Recording values in an object.
-            jsonObj.put("id", (objID+1));
-            jsonObj.put("mani_path", mani_path);
-            jsonObj.put("cmd_line", cmd_line);
-            jsonObj.put("timestamp", ft.format(date));
-            jsonObj.put("parent", parentID);
-            System.out.println(parentID+"parent id");
-            Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(repo_path+".metadata.json", true), "UTF-8"));
-            out.write(jsonObj.toJSONString().replace("\\","")+"\n");
-            System.out.println(jsonObj.toJSONString().replace("\\","")+"\n");
-            out.close();
+            int parentID = parentId(repo_path, cmd_line, repo_name);
+            
+            try (
+                Writer writer = Files.newBufferedWriter(Paths.get(meta_filename), 
+                     StandardOpenOption.APPEND);
+                CSVWriter csvWriter = new CSVWriter(writer,
+                    CSVWriter.DEFAULT_SEPARATOR,
+                    CSVWriter.NO_QUOTE_CHARACTER,
+                    CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                    CSVWriter.DEFAULT_LINE_END);
+            ) {
+            //Recording values in an list of object for CSV
+            if(meta_filename.length() == 60){
+                String[] headerRecord = {"id", "mani_path", "cmd_line", "timestamp", "parent_id"};
+                csvWriter.writeNext(headerRecord);
+            }
+
+            csvWriter.writeNext(new String[]{Integer.toString(objID), mani_path, String.join(" ", cmd_line), ft.format(date), Integer.toString(parentID)});
+                    System.out.println(parentID+" parent id"+Arrays.toString(cmd_line));
+
+            // Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(repo_path+".metadata.csv", true), "UTF-8"));
+
+            /*out.write(jsonObj.toJSONString().replace("\\","")+"\n");
+            System.out.println(jsonObj.toJSONString().replace("\\","")+"\n");*/
+            // out.close();
+            }
         }
         catch(Exception e) {
-            System.out.println(e+"Manifest error");
+            System.out.println(e+"Metadata error");
+        }
+    }
+    public static int countLines(String filename) throws IOException {
+        InputStream is = new BufferedInputStream(new FileInputStream(filename));
+        try {
+            byte[] c = new byte[1024];
+            int count = 0;
+            int readChars = 0;
+            boolean empty = true;
+            while ((readChars = is.read(c)) != -1) {
+                empty = false;
+                for (int i = 0; i < readChars; ++i) {
+                    if (c[i] == '\n') {
+                        ++count;
+                    }
+                }
+            }
+            return (count == 0 && !empty) ? 1 : count;
+        } finally {
+            is.close();
         }
     }
 
     //function to calculate parent id of the current manifest file
-    public static int parentId(String repo_path, String[] cmd_line) throws IOException, ParseException{
+    public static int parentId(String repo_path, String[] cmd_line, String repo) throws IOException, ParseException{
 
-        int objCount;
-        String ref_mani;
-        JSONParser parser = new JSONParser();
-        JSONArray metaJsonArray = (JSONArray) parser.parse(new FileReader(repo_path+".metadata.json"));
-        objCount = metaJsonArray.size();
-
+        int objCount, parentId = 0;
+        String ref_mani, line="", csvSplit=",";
+        objCount = countLines(repo) - 1;
+        String[] csvContent = new String[0];
+        
         // parent id of the create manifest will be zero
         if(objCount == 0){
-            return 0;
+            parentId = 0;
         }
         else{
             switch(cmd_line[0]){
                 case "cout":
+                        int index = 1;
                         ref_mani = cmd_line[2];
-                        //id of object with mani_path = value cmd_line[2]
-                        for(Object o: metaJsonArray){
-                            JSONObject metaObj = (JSONObject) o;
-                            if(ref_mani.equalsIgnoreCase(metaObj.get("mani_path").toString())){
-                                return (Integer.parseInt(metaObj.get("id").toString()));
+                        FileReader file = new FileReader(repo);
+                        BufferedReader br=new BufferedReader(file);
+
+                        while ((line = br.readLine()) != null) {
+                            csvContent = line.split(csvSplit);
+                            if(csvContent[2].equals("repo/"+ref_mani)) {
+                                parentId = index; 
                             }
+                            index++;
                         }
                 case "cin":
-                        return objCount;
+                        parentId = objCount;
                 default:
-                        System.out.println("Learn to code!");
+                        System.out.println("Learn to code!"+ Arrays.toString(cmd_line));
             }
         }
-        return 0;
+        return parentId;
     }
 
      public static void showFilesCheckIn(File[] files, String src_path, String target) {
