@@ -29,7 +29,8 @@ import java.io.*;
 
 public class Main {        
     
-    static Label newLabel = new Label();
+    static Scanner sc = new Scanner(System.in); // takes user input
+    static Label newLabel = new Label();  
     
   /*
    * main: takes user input and separates them by spaces.
@@ -38,46 +39,74 @@ public class Main {
    */
     public static void main( String[] args ) throws IOException, ParseException{
         
-        InputParser sc = InputParser.getParser();
-        Create_Repo createRepo = new Create_Repo();
-        Check_In checkIn = new Check_In();
-        Check_Out checkOut = new Check_Out();   
-        Merge merger = new Merge();
-        
+        String src;
+        String dest;
+        String mani;
+        String label;
+        String[] arr;
+//        File filin = new File("cinCount.txt"), filout = new File("coutCount.txt");
         boolean isExit = false;
         
       // take all user input
         while( !isExit ) {
-            String token = sc.GetToken();      
+            String token = sc.next();                  
         
           //parse input and read each string  token                    
             switch( token ) {            
             
-          // keyword: create - create a repository of the name in next token
+            //keyword: create - create a repository of the name in next token
             case "create":
-                createRepo.RunOperation();
+                src = sc.next();
+                dest = sc.next();
+                System.out.println( "Create a new repository from source: " + src );
+                System.out.println( "Copy repository into: " + dest );
+                arr = new String[ 3 ];
+                arr[0] = token;
+                arr[1] = src;
+                arr[2] = dest;
+                CreateMain.CreateSource( arr );
                 break;
                 
-          // check in command
             case "cin":
-                checkIn.RunOperation();
-            	break;
-            	
-          // check out command
-            case "cout":
-                checkOut.RunOperation();
-            	break;
-            
-          // label a manifest file
-            case "label":                                       
-                newLabel.CreateLabel();
-            	break;
-            	
-          // do a merge
-            case "merge":
-                merger.RunOperation();
-                break;
+            	src = sc.next();
+                dest = sc.next();
+                System.out.println( "Merge from: " + src );
+                System.out.println( "Merge changes to: " + dest );
+                arr = new String[ 3 ];
+                arr[0] = token;
+                arr[1] = src;
+                arr[2] = dest;
                 
+                CreateMain.Checkin( arr );
+            	break;
+            	
+            case "cout":
+            	src = sc.next();
+            	mani = sc.next();
+            	dest = sc.next();
+            	
+//                mani = newLabel.CheckForLabel( src, mani );
+
+                System.out.println( "Copy repo from: " + src );
+                System.out.println( "Manifest version: " + mani );
+
+                arr = new String[ 4 ];
+                arr[0] = token;
+                arr[1] = src;
+                arr[2] = mani;
+                arr[3] = dest;
+                CreateMain.Checkout( arr );
+                System.out.println( "Copy repo into: " + dest );
+            	break;
+
+            case "label":
+                src = sc.next();
+                mani = sc.next();
+                String temp = sc.nextLine();
+                label = temp.trim();
+                newLabel.CreateLabel( src, mani, label );
+            	break;
+
           // exit the command line
             case "exit":
                 isExit = true;
@@ -89,7 +118,6 @@ public class Main {
                 break;
             }            
         }                
-        sc.CloseInput();
-        System.out.println( "Exited successfully." );
+        sc.close();
     }
 }
