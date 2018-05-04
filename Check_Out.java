@@ -56,9 +56,10 @@ public class Check_Out implements Component_Input {
         System.out.println( "Manifest version: " + mani );
         System.out.println( "Copy repo into: " + dest );
         arr = new String[ 3 ];
-        arr[0] = src;
-        arr[1] = mani;
-        arr[2] = dest;        
+        arr[0] = "cout";
+        arr[1] = src;
+        arr[2] = mani;
+        arr[3] = dest;        
         try {
             CreateMain.Checkout( arr );
         } catch (IOException | ParseException e) {
