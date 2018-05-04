@@ -100,7 +100,7 @@ public class CreateMain {
                 try{
                      artID = copyFile(ned_stark, target + ned_stark);
 //                     if(System.out.print(artID != null)){
-                        createManifest.Manifest(ned_stark, artID, mani_path); 
+                        CreateManifest.Manifest(ned_stark, artID, mani_path); 
 //                     }
                 }
                 catch(Exception e){
@@ -171,7 +171,7 @@ public class CreateMain {
 
         mani_path = src+"/mani_cout_1_.json";                      //path where the manifest file will be created, i.r. repo/
         if(new File(mani_path).exists()){
-            c = createManifest.maniFileNo(src, cmd) + 1;        //returns the most recent version of the manifest file corresponding to cout & increments it
+            c = CreateManifest.maniFileNo(src, cmd) + 1;        //returns the most recent version of the manifest file corresponding to cout & increments it
             mani_path = src+"/mani_cout_"+(c)+"_.json";
         }
         BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      //create a filewriter
@@ -222,7 +222,7 @@ public class CreateMain {
             while((b=FI.read())!=-1){ 
                 FO.write(b);
             }            
-            createManifest.Manifest(tgtfolder+"/"+myFileName, artID, mani_path);        //create the manifest file
+            CreateManifest.Manifest(tgtfolder+"/"+myFileName, artID, mani_path);        //create the manifest file
 
             System.out.println("File Copied...");
             FI.close();
@@ -258,7 +258,7 @@ public class CreateMain {
 
         mani_path = args[1]+"/mani_cin_1_.json";
         if(new File(mani_path).exists()){
-            i = createManifest.maniFileNo(args[1], cmd) + 1;        //does this basically return the most recent version of the manifest file????
+            i = CreateManifest.maniFileNo(args[1], cmd) + 1;        //does this basically return the most recent version of the manifest file????
             mani_path = args[1]+"/mani_cin_"+(i)+"_.json";
         }
 
@@ -429,7 +429,7 @@ public class CreateMain {
                     artID = copyFile(src_path + jon_snow, target + jon_snow);
 //                     if(System.out.print(artID != null)){
                     System.out.println("artID okay!");
-                        createManifest.Manifest(src_path + jon_snow, artID, mani_path);   // ( , , )
+                        CreateManifest.Manifest(src_path + jon_snow, artID, mani_path);   // ( , , )
 //                     }
                 }
                 catch(Exception e){
