@@ -21,7 +21,7 @@ import org.json.simple.parser.JSONParser;
  */
 
 
-public class createManifest {
+public class CreateManifest {
     public static void Manifest(String ned_stark, String artID, String mani_path) throws IOException {
         try {
             Date date = new Date();
