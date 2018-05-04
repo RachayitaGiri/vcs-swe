@@ -23,7 +23,7 @@ import org.json.simple.parser.ParseException;
  */
 public class Label {        
     
-    JSONMaker jsonClass = JSONMaker.getJSONMaker();
+    JSONMaker jsonClass = new JSONMaker();
     
     /*  TrimLength: if the length >30 characters, only the first 30 will be returned
      *      input: the string to be trimmed of white space an then checked for length
