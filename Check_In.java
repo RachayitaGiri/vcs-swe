@@ -38,14 +38,12 @@ public class Check_In implements Component_Input {
         System.out.println( "Merge from: " + src );
         System.out.println( "Merge changes to: " + dest );
         arr = new String[ 2 ];
-        arr[0] = src;
+        arr[0] = "cin";
         arr[1] = dest;
+        arr[2] = dest;
         try {
-            CreateMain.Checkout( arr );
+            CreateMain.Checkin( arr );
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
