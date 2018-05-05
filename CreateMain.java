@@ -43,6 +43,7 @@ public class CreateMain {
         meta_path = args[2]+"/.metadata.csv";
         BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));
         BufferedWriter metabw = new BufferedWriter(new FileWriter(meta_path));
+        
         //update metadata file for create command
         metadata(args[1]+"/", mani_path, args, args[2]+"/.metadata.csv");
         metabw.close();
@@ -175,7 +176,9 @@ public class CreateMain {
             mani_path = src+"/mani_cout_"+(c)+"_.json";
         }
         BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      //create a filewriter
-//        manibw.close();
+
+        // invoke metadata function to update the metadata file
+        metadata(args[1]+"/", mani_path, args, args[1]+"/.metadata.csv");
 
         for (Object o : a ) {
 
@@ -249,11 +252,9 @@ public class CreateMain {
    public static void Checkin(String[] args) throws IOException{
        String src = args[2]+"/";                            //merge from path enterd by the user - Wall
        String target = args[1]+"/source/";                  //merge to path, entered by the user - KL
-       
-       String cmd = "cin";
-       
+       String cmd = "cin";       
        int i=1;
-        
+
         File[] files = new File(src).listFiles();                   //list the files/dirs in the first argument i.e in the existing repo
 
         mani_path = args[1]+"/mani_cin_1_.json";
@@ -263,7 +264,7 @@ public class CreateMain {
         }
 
         BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      // Create manifest file
-        
+
         // invoke metadata function to update the metadata file
         metadata(args[1]+"/", mani_path, args, args[1]+"/.metadata.csv");
 
@@ -271,8 +272,7 @@ public class CreateMain {
         System.out.println("Folder Checked in successfully.");
 
         //modify the manifest file to the correct json format
-        //append "," at end of each line and "[", "]" at start and end of file
-        
+        //append "," at end of each line and "[", "]" at start and end of file        
         String line;
         StringBuffer file_content = new StringBuffer();
         FileReader file = new FileReader(mani_path);
@@ -301,7 +301,7 @@ public class CreateMain {
             System.out.println(meta_filename);
 
             //calculate Object id
-            int objID = countLines(meta_filename);      // total number of lines includes header line too. objID -- object id for th ehierarchy
+            int objID = countLines(meta_filename) + 1;      // total number of lines includes header line too. objID -- object id for th ehierarchy
 
             // calculate the parent ID
             int parentID = parentId(repo_path, cmd_line, repo_name);
@@ -316,10 +316,6 @@ public class CreateMain {
                     CSVWriter.DEFAULT_LINE_END);
             ) {
             //Recording values in an list of object for CSV
-            if(meta_filename.length() == 60){
-                String[] headerRecord = {"id", "mani_path", "cmd_line", "timestamp", "parent_id"};
-                csvWriter.writeNext(headerRecord);
-            }
 
             csvWriter.writeNext(new String[]{Integer.toString(objID), mani_path, String.join(" ", cmd_line), ft.format(date), Integer.toString(parentID)});
                     System.out.println(parentID+" parent id"+Arrays.toString(cmd_line));
@@ -357,11 +353,11 @@ public class CreateMain {
     }
 
     //function to calculate parent id of the current manifest file
-    public static int parentId(String repo_path, String[] cmd_line, String repo) throws IOException, ParseException{
+    public static int parentId(String repo_path, String[] cmd_line, String metafilename) throws IOException, ParseException{
 
         int objCount, parentId = 0;
         String ref_mani, line="", csvSplit=",";
-        objCount = countLines(repo) - 1;
+        objCount = countLines(metafilename);
         String[] csvContent = new String[0];
         
         // parent id of the create manifest will be zero
@@ -373,18 +369,23 @@ public class CreateMain {
                 case "cout":
                         int index = 1;
                         ref_mani = cmd_line[2];
-                        FileReader file = new FileReader(repo);
+                        FileReader file = new FileReader(metafilename);
                         BufferedReader br=new BufferedReader(file);
 
                         while ((line = br.readLine()) != null) {
                             csvContent = line.split(csvSplit);
-                            if(csvContent[2].equals("repo/"+ref_mani)) {
-                                parentId = index; 
+                            System.out.println(csvContent[1]+" while ");
+                            if(csvContent[1].contains(ref_mani)) {
+                                System.out.println(csvContent[1]+" if "+ index +" csv0 ->"+csvContent[0]);
+                                parentId = index;
+                                break;
                             }
                             index++;
                         }
+                        break;
                 case "cin":
                         parentId = objCount;
+                        break;
                 default:
                         System.out.println("Learn to code!"+ Arrays.toString(cmd_line));
             }
@@ -392,7 +393,7 @@ public class CreateMain {
         return parentId;
     }
 
-     public static void showFilesCheckIn(File[] files, String src_path, String target) {
+    public static void showFilesCheckIn(File[] files, String src_path, String target) {
         String parent, file_name, dir_name, artID, jon_snow;
 
         for (File file : files) {
@@ -429,7 +430,7 @@ public class CreateMain {
                     artID = copyFile(src_path + jon_snow, target + jon_snow);
 //                     if(System.out.print(artID != null)){
                     System.out.println("artID okay!");
-                        CreateManifest.Manifest(src_path + jon_snow, artID, mani_path);   // ( , , )
+                        CreateManifest.Manifest(src_path + jon_snow, artID, mani_path);
 //                     }
                 }
                 catch(Exception e){
