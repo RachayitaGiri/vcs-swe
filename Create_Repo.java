@@ -34,9 +34,10 @@ public class Create_Repo implements Component_Input {
         dest = sc.GetToken();
         System.out.println( "Create a new repository from source: " + src );
         System.out.println( "Copy repository into: " + dest );
-        arr = new String[ 2 ];
-        arr[0] = src;
-        arr[1] = dest;
+        arr = new String[ 3 ];
+        arr[0] = "create";
+        arr[1] = src;
+        arr[2] = dest;
         try {
             CreateMain.CreateSource( arr );
         } catch (IOException e) {
