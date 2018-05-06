@@ -1,4 +1,3 @@
-package vcs;
 import java.io.*;
 
 /*
