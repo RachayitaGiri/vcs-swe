@@ -22,9 +22,10 @@ public class Merge implements Component_Input {
     private InputParser sc = InputParser.getParser();
     
     /*
-	 * RunOperation: implemented so that the merge command can be carried out
-	 *		syntax: merge 'repo_name' 'version_name_1' 'version_name_2'
-     */
+    * RunOperation: implemented so that the merge command can be carried out
+    * syntax: merge 'repo_name' 'version_name_1' 'version_name_2'
+    */
+
     @Override
     public void RunOperation() {
         
@@ -52,8 +53,5 @@ public class Merge implements Component_Input {
         } catch (IOException e) {
         	e.printStackTrace();
         }
-        
-
     }
-
 }
