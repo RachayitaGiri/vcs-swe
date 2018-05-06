@@ -1,5 +1,4 @@
 import java.io.IOException;
-
 import org.json.simple.parser.ParseException;
 
 /*
@@ -37,7 +36,7 @@ public class Check_In implements Component_Input {
         dest = sc.GetToken();
         System.out.println( "Merge from: " + src );
         System.out.println( "Merge changes to: " + dest );
-        arr = new String[ 2 ];
+        arr = new String[ 3 ];
         arr[0] = "cin";
         arr[1] = dest;
         arr[2] = dest;
@@ -47,7 +46,5 @@ public class Check_In implements Component_Input {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
-
 }
