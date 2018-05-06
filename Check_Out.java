@@ -1,6 +1,5 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import org.json.simple.parser.ParseException;
 
 /*
@@ -38,7 +37,7 @@ public class Check_Out implements Component_Input {
         src = sc.GetToken();
         mani = sc.GetToken();
         
-        try {
+/*        try {
             mani = newLabel.CheckForLabel( src, mani );
         } catch (FileNotFoundException e1) {
             // TODO Auto-generated catch block
@@ -49,13 +48,13 @@ public class Check_Out implements Component_Input {
         } catch (ParseException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
-        }
+        }*/
         
         dest = sc.GetToken();
         System.out.println( "Copy repo from: " + src );
         System.out.println( "Manifest version: " + mani );
         System.out.println( "Copy repo into: " + dest );
-        arr = new String[ 3 ];
+        arr = new String[ 4 ];
         arr[0] = "cout";
         arr[1] = src;
         arr[2] = mani;
@@ -66,8 +65,5 @@ public class Check_Out implements Component_Input {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-
     }
-
 }
