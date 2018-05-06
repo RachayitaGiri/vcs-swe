@@ -1,9 +1,15 @@
+import java.io.*;
+import java.nio.file.*;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+
 /*
  * class name: CreateMain
  * Authors: Derek Baker
  *              contact: derekjohnbaker23@gmail.com
  *              
- *          Rachayita Giri
+ *          Rachayita Giri 
  *              contact: rachayitagiri@gmail.com
  *              
  *          Saloni Buddhadeo
@@ -15,17 +21,6 @@
  * Also added the Checkout function to create a local copy of a guven project version corresponding to the manifest file referred to by the user.
  * 
  */
-import com.opencsv.CSVWriter;
-
-import java.io.*;
-import java.nio.file.*;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class CreateMain {    
     static String mani_path, meta_path;
@@ -45,7 +40,7 @@ public class CreateMain {
         BufferedWriter metabw = new BufferedWriter(new FileWriter(meta_path));
         
         //update metadata file for create command
-        metadata(args[1]+"/", mani_path, args, args[2]+"/.metadata.csv");
+        UpdateMetadata.metadata(args[1]+"/", mani_path, args, args[2]+"/.metadata.csv");
         metabw.close();
 
         System.out.println("Repo created successfully.");
@@ -69,8 +64,58 @@ public class CreateMain {
         manibw.close();
     }
 
-        public static void showFiles(File[] files, String src_name, String target) {
-        String parent, file_name, dir_name, artID, ned_stark;
+    //Function to checkin files
+    //Main.java passes two arguments - check in folder, target repo folder    
+    public static void Checkin(String[] args) throws IOException{
+       File[] filesinrepo = new File(args[1] + "/").listFiles();
+       String source_name = "";
+
+       for(File f : filesinrepo){
+            if(f.isDirectory())
+                source_name = f.getName();
+       }
+       String src = args[2] + "/";                       //merge from path enterd by the user - Wall
+
+       String target = args[1]+"/"+source_name;                  //merge to path, entered by the user - KL
+       String cmd = "cin";       
+       int i=1;
+
+        File[] files = new File(src).listFiles();                   //list the files/dirs in the first argument i.e in the existing repo
+
+        mani_path = args[1]+"/mani_cin_1_.json";
+        if(new File(mani_path).exists()){
+            i = CreateManifest.maniFileNo(args[1], cmd) + 1;
+            mani_path = args[1]+"/mani_cin_"+(i)+"_.json";
+        }
+
+        BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      // Create manifest file
+
+        // invoke metadata function to update the metadata file
+        UpdateMetadata.metadata(args[1]+"/", mani_path, args, args[1]+"/.metadata.csv");
+
+        showFilesCheckIn(files, src, target);
+        System.out.println("Folder Checked in successfully.");
+
+        //modify the manifest file to the correct json format
+        //append "," at end of each line and "[", "]" at start and end of file        
+        String line;
+        StringBuffer file_content = new StringBuffer();
+        FileReader file = new FileReader(mani_path);
+        BufferedReader br=new BufferedReader(file);
+        file_content.append("[");
+        //read each line from file
+        while((line = br.readLine())!= null){
+            file_content.append(line);
+            file_content.append(",");
+        }
+        file_content.append("]");
+        manibw.write(file_content.toString());
+        manibw.close();
+        
+    }
+
+    public static void showFiles(File[] files, String src_name, String target) {
+    String parent, file_name, dir_name, artID, ned_stark;
 
         for (File file : files) {
             ned_stark = src_name + "/";
@@ -100,9 +145,7 @@ public class CreateMain {
 
                 try{
                      artID = copyFile(ned_stark, target + ned_stark);
-//                     if(System.out.print(artID != null)){
-                        CreateManifest.Manifest(ned_stark, artID, mani_path); 
-//                     }
+                        CreateManifest.Manifest(ned_stark, artID, mani_path);
                 }
                 catch(Exception e){
                     System.out.println(e+" Exception!");
@@ -119,9 +162,8 @@ public class CreateMain {
         //Invoke the calculation of the artifact id for the given file
         String artId, file_content="";
         int i, checksum=0, counter=0;
-        artId = artID(file_name);
+        artId = Calc_ArtId.artID(file_name);
 
-        //----------
         if(target.contains(artId))
             return null;
         String fileDest = target;
@@ -134,7 +176,7 @@ public class CreateMain {
         File testfile = new File(workingDirFile, inputName);
 
         if(!testfile.exists()){
-            //new File(fileDest).mkdir();
+
             BufferedWriter bw=new BufferedWriter(new FileWriter(fileDest+"/"+artId));
 
             while((i=br.read())!=-1){
@@ -151,246 +193,6 @@ public class CreateMain {
             System.out.print("null");
             return null;
         }
-    }
-
-    //Function to checkout files
-    //Main.java passes three arguments - repofolder, manifest, targetfolder
-    public static void Checkout(String[] args) throws IOException, ParseException {
-
-        String src = args[1];
-        String mani = args[2];
-        String dest = args[3];
-        int i;
-
-        JSONParser parser = new JSONParser();
-        //JSONArray a = (JSONArray) parser.parse(new FileReader("/home/rachayitagiri/NetBeansProjects/vcs-swe/src/"+src+"/"+mani));
-        JSONArray a = (JSONArray) parser.parse(new FileReader(src+"/"+mani));
-
-        //Process of creating the manifest file for cout command
-        String cmd = "cout";
-        int c=1;
-
-        mani_path = src+"/mani_cout_1_.json";                      //path where the manifest file will be created, i.r. repo/
-        if(new File(mani_path).exists()){
-            c = CreateManifest.maniFileNo(src, cmd) + 1;        //returns the most recent version of the manifest file corresponding to cout & increments it
-            mani_path = src+"/mani_cout_"+(c)+"_.json";
-        }
-        BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      //create a filewriter
-
-        // invoke metadata function to update the metadata file
-        metadata(args[1]+"/", mani_path, args, args[1]+"/.metadata.csv");
-
-        for (Object o : a ) {
-
-            JSONObject artifact = (JSONObject) o; 
-            String path = (String) artifact.get("art_src_path");
-            String artID = (String) artifact.get("art_ID");
-
-            File myFile = new File(path);
-            String myDir = myFile.getParent();          //get parent directory path
-            String myFileName = myFile.getName();       //get filename
-            System.out.println("Source path: "+path);   //print the path to the corresponding file in the source folder
-
-            //get path from art_src_path and split it to get the corresponding target destination
-            String parts[] = myDir.split("/");
-            String[] arr = new String[parts.length-1];
-            for (i=0;i<parts.length-1;i++ ) {
-                arr[i] = parts[i+1];
-            }
-            StringBuilder result = new StringBuilder();
-            for(String string : arr) {
-                result.append(string);
-                result.append("/");
-            }
-            String tgtfolder = result.length() > 0 ? result.substring(0, result.length() - 1): ""; 
-            tgtfolder = dest+"/"+tgtfolder;
-            System.out.println("Destination :"+tgtfolder);
-
-            if (new File(tgtfolder).exists()) {
-                System.out.println("Destination directory "+tgtfolder+" exists...");
-                System.out.println("Creating file... "+tgtfolder+"/"+myFileName);
-            }
-            else{
-                System.out.println("Creating directory: "+tgtfolder);
-                new File(tgtfolder).mkdirs();
-            }
-           //FileInputStream FI = new FileInputStream("/home/rachayitagiri/NetBeansProjects/vcs-swe/src/"+myFile);
-            FileInputStream FI = new FileInputStream(myFile);
-            File outfile = new File(tgtfolder+"/"+myFileName);
-            outfile.createNewFile();
-
-            FileOutputStream FO = new FileOutputStream(tgtfolder+"/"+myFileName);
-            int b;
-            //read content and write in another file
-            while((b=FI.read())!=-1){ 
-                FO.write(b);
-            }            
-            CreateManifest.Manifest(tgtfolder+"/"+myFileName, artID, mani_path);        //create the manifest file
-
-            System.out.println("File Copied...");
-            FI.close();
-    }
-        //modify the manifest file to the correct json format
-        //append "," at end of each line and "[", "]" at start and end of file
-        String line;
-        StringBuffer file_content = new StringBuffer();
-        FileReader file = new FileReader(mani_path);
-        BufferedReader br=new BufferedReader(file);
-        file_content.append("[");
-        //read each line from file
-        while((line = br.readLine())!= null){
-            file_content.append(line);
-            file_content.append(",");
-        }
-        file_content.append("]");
-        manibw.write(file_content.toString());
-        manibw.close();                     // make sure manibw Stream is not closed in this method 
-
-}
-    //Function to checkin files
-    //Main.java passes two arguments - check in folder, target repo folder    
-   public static void Checkin(String[] args) throws IOException{
-       String src = args[2]+"/";                            //merge from path enterd by the user - Wall
-       String target = args[1]+"/source/";                  //merge to path, entered by the user - KL
-       String cmd = "cin";       
-       int i=1;
-
-        File[] files = new File(src).listFiles();                   //list the files/dirs in the first argument i.e in the existing repo
-
-        mani_path = args[1]+"/mani_cin_1_.json";
-        if(new File(mani_path).exists()){
-            i = CreateManifest.maniFileNo(args[1], cmd) + 1;        //does this basically return the most recent version of the manifest file????
-            mani_path = args[1]+"/mani_cin_"+(i)+"_.json";
-        }
-
-        BufferedWriter manibw = new BufferedWriter(new FileWriter(mani_path));      // Create manifest file
-
-        // invoke metadata function to update the metadata file
-        metadata(args[1]+"/", mani_path, args, args[1]+"/.metadata.csv");
-
-        showFilesCheckIn(files, src, target);
-        System.out.println("Folder Checked in successfully.");
-
-        //modify the manifest file to the correct json format
-        //append "," at end of each line and "[", "]" at start and end of file        
-        String line;
-        StringBuffer file_content = new StringBuffer();
-        FileReader file = new FileReader(mani_path);
-        BufferedReader br=new BufferedReader(file);
-        file_content.append("[");
-        //read each line from file
-        while((line = br.readLine())!= null){
-            file_content.append(line);
-            file_content.append(",");
-        }
-        file_content.append("]");
-        manibw.write(file_content.toString());
-        manibw.close();
-        
-    }
-
-    //function to update .metadata.json file
-    //receives four arguments - path to repo, path of the manifest file created, command line arguments, repo name
-    public static void metadata(String repo_path, String mani_path, String[] cmd_line, String repo_name){
-        try {
-            Date date = new Date();
-            SimpleDateFormat ft = new SimpleDateFormat ("yyyy:MM:dd hh:mm:ss");
-            String timestamp, meta_filename;
-
-            meta_filename = repo_name;
-            System.out.println(meta_filename);
-
-            //calculate Object id
-            int objID = countLines(meta_filename) + 1;      // total number of lines includes header line too. objID -- object id for th ehierarchy
-
-            // calculate the parent ID
-            int parentID = parentId(repo_path, cmd_line, repo_name);
-            
-            try (
-                Writer writer = Files.newBufferedWriter(Paths.get(meta_filename), 
-                     StandardOpenOption.APPEND);
-                CSVWriter csvWriter = new CSVWriter(writer,
-                    CSVWriter.DEFAULT_SEPARATOR,
-                    CSVWriter.NO_QUOTE_CHARACTER,
-                    CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                    CSVWriter.DEFAULT_LINE_END);
-            ) {
-            //Recording values in an list of object for CSV
-
-            csvWriter.writeNext(new String[]{Integer.toString(objID), mani_path, String.join(" ", cmd_line), ft.format(date), Integer.toString(parentID)});
-                    System.out.println(parentID+" parent id"+Arrays.toString(cmd_line));
-
-            // Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(repo_path+".metadata.csv", true), "UTF-8"));
-
-            /*out.write(jsonObj.toJSONString().replace("\\","")+"\n");
-            System.out.println(jsonObj.toJSONString().replace("\\","")+"\n");*/
-            // out.close();
-            }
-        }
-        catch(Exception e) {
-            System.out.println(e+"Metadata error");
-        }
-    }
-    public static int countLines(String filename) throws IOException {
-        InputStream is = new BufferedInputStream(new FileInputStream(filename));
-        try {
-            byte[] c = new byte[1024];
-            int count = 0;
-            int readChars = 0;
-            boolean empty = true;
-            while ((readChars = is.read(c)) != -1) {
-                empty = false;
-                for (int i = 0; i < readChars; ++i) {
-                    if (c[i] == '\n') {
-                        ++count;
-                    }
-                }
-            }
-            return (count == 0 && !empty) ? 1 : count;
-        } finally {
-            is.close();
-        }
-    }
-
-    //function to calculate parent id of the current manifest file
-    public static int parentId(String repo_path, String[] cmd_line, String metafilename) throws IOException, ParseException{
-
-        int objCount, parentId = 0;
-        String ref_mani, line="", csvSplit=",";
-        objCount = countLines(metafilename);
-        String[] csvContent = new String[0];
-        
-        // parent id of the create manifest will be zero
-        if(objCount == 0){
-            parentId = 0;
-        }
-        else{
-            switch(cmd_line[0]){
-                case "cout":
-                        int index = 1;
-                        ref_mani = cmd_line[2];
-                        FileReader file = new FileReader(metafilename);
-                        BufferedReader br=new BufferedReader(file);
-
-                        while ((line = br.readLine()) != null) {
-                            csvContent = line.split(csvSplit);
-                            System.out.println(csvContent[1]+" while ");
-                            if(csvContent[1].contains(ref_mani)) {
-                                System.out.println(csvContent[1]+" if "+ index +" csv0 ->"+csvContent[0]);
-                                parentId = index;
-                                break;
-                            }
-                            index++;
-                        }
-                        break;
-                case "cin":
-                        parentId = objCount;
-                        break;
-                default:
-                        System.out.println("Learn to code!"+ Arrays.toString(cmd_line));
-            }
-        }
-        return parentId;
     }
 
     public static void showFilesCheckIn(File[] files, String src_path, String target) {
@@ -440,31 +242,4 @@ public class CreateMain {
         }
     }
 
-    
-public static String artID(String file_name) throws IOException{
-        // String file_name = "hp.txt";
-
-        FileReader file = new FileReader(file_name);
-        File afile = new File(file_name);
-        BufferedReader br=new BufferedReader(file);
-        String art_file_name;
-        int i, checksum=0, counter=0;
-        char cha = '\0';
-        int weights[] = {1,7,11,17};
-        // double file_size = file.length();
-
-        while((i=br.read())!=-1){
-            cha = (char)i;                                      //Converting string to char
-            checksum += (int) (char) i * weights[counter%4];    //checksum calculation - ascii of character * corresponding weight
-            counter++;                                          //counter for weights
-        }
-        checksum -= (int) cha * weights[(counter-1)%4];
-        checksum %= (Math.pow(2,31) - 1);
-        art_file_name = checksum+"-L"+afile.length()+".txt";    // artifactID - new file name
-
-        br.close();
-        file.close();
-
-        return art_file_name;
-    }
-}
+}   
