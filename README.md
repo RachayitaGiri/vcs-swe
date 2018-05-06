@@ -15,6 +15,9 @@ Version Control System - Create Repository
 Project # 2
 Version Control System - Checkout, Checkin, Labels
 
+Project # 3
+Version Control System - Merge
+
 ----------------------
 TEAM NAME AND MEMBERS
 ----------------------
@@ -41,6 +44,10 @@ The "Checkout, Checkin, Labels" project is the second step in the Version Contro
 The Checkout feature helps the user create a local copy from the repository for a project version that the user wants. The version is referred to by the user by giving as input a manifest file name or label corresponding to it. 
 
 The Checkin feature enables the users to update the repository with their version of the project. Also, the Label feature has been added to make the system more user-friendly. Users can assign labels to project versions so that they can keep track of manifest files more easily. It also helps a better referencing scheme in the command line. 
+
+The "Merge" project is the final phase of the Version Control System.
+
+In this phase, the user enters two versions of the repository that they want to merge. Merge can only be run between versions from two different branches. For the entered versions on the command line, the common ancestor is found by traversing over the command history or manifest hierarchy. Once the common ancestor is found, a 3-way merge is performed over the versions to be merged and the common ancestor version. In case of a name conflict, the conflict is resolved by adding suffixes _MR, _MG and _MT respectively 
 
 ----------------------------
 CALCULATING THE ARTIFACT ID:
