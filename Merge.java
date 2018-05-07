@@ -22,17 +22,19 @@ public class Merge implements Component_Input {
     private InputParser sc = InputParser.getParser();
     
     /*
-    * RunOperation: implemented so that the merge command can be carried out
-    * syntax: merge 'repo_name' 'version_name_1' 'version_name_2'
-    */
-
+	 * RunOperation: implemented so that the merge command can be carried out
+	 * syntax: merge 'repo_name' 'version_name_1' 'version_name_2'
+     */
     @Override
     public void RunOperation() {
         
+        String repo_name;
         String versionR;
         String versionT;
+        String[] arr;
         
         //Read input version names 
+        repo_name = sc.GetToken();
         versionR = sc.GetToken();
         versionT = sc.GetToken();
         
@@ -49,7 +51,7 @@ public class Merge implements Component_Input {
 
         //Call the merge function in Run_Merge.java
         try{
-        	Run_Merge.doMerge( arr );
+        	Run_Merge.merge( arr );
         } catch (IOException e) {
         	e.printStackTrace();
         }
