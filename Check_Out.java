@@ -60,7 +60,7 @@ public class Check_Out implements Component_Input {
         arr[2] = mani;
         arr[3] = dest;        
         try {
-            CreateMain.Checkout( arr );
+            Run_Checkout.checkout( arr );
         } catch (IOException | ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
